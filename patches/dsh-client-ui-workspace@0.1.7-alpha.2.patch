@@ -9,11 +9,25 @@ diff --git a/lib/client.js b/lib/client.js
  				let initial = "waiting";
  				const reconcile = () => {
  					if (this.lifetime.signal.aborted) return;
+@@ -1354,11 +1355,11 @@
+ 							onClose: () => {
+ 								setMenuOpen(false);
+ 							},
+-							items: workspaceMenuItems,
++							items: [...workspaceMenuItems.slice(0, 1), ...(window.__DSH_DESKTOP_ARCHIVE_WORKSPACE__ ? [{ id: "desktop-archive", label: window.__DSH_DESKTOP_ARCHIVE_WORKSPACE__.label(), icon: (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconArchiveOutlineRegular, { size: 16 }) }] : []), ...workspaceMenuItems.slice(1)],
+ 							onSelect: (id) => {
+ 								setMenuOpen(false);
+ 								/* v8 ignore next -- Menu can emit only the rename and delete rows supplied above. */
+-								if (id !== "rename" && id !== "delete") return;
++								if (id === "desktop-archive") { window.__DSH_DESKTOP_ARCHIVE_WORKSPACE__?.archive(group.workspaceId); return; } if (id !== "rename" && id !== "delete") return;
+ 								if (id === "rename") actions.rename();
+ 								else actions.delete();
+ 							},
 @@ -1634,6 +1635,7 @@
  					role: "treeitem",
  					"aria-selected": selected,
  					"aria-description": row.archived ? t("toast.archivedNotOpenable") : void 0,
-+					onContextMenu: globalThis.__DSH_SESSION_WINDOW_UI__ ? (e) => { if (!row.blank) { e.preventDefault(); e.stopPropagation(); setMenuOpen(true); } } : void 0,
++					onContextMenu: (e) => { if (!row.blank && (window.__DSH_DESKTOP_ARCHIVE_WORKSPACE__ || globalThis.__DSH_SESSION_WINDOW_UI__)) { e.preventDefault(); e.stopPropagation(); setMenuOpen(true); } },
  					onClick: () => {
  						onOpen(node.id);
  					},
