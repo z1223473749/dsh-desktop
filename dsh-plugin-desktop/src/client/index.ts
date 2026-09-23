@@ -19,6 +19,7 @@ import { startRendererBootReporter } from './boot-health.ts'
 import { applyDesktopSettings } from './desktop-settings.ts'
 import { installDesktopDirectoryPickerBridge } from './directory-picker.ts'
 import { parseDesktopClientEnvironment } from './environment.ts'
+import { installPastedTextFileBridge } from './pasted-text-file.ts'
 import { applyExtendedShell } from './extended-shell.ts'
 import { installDesktopLaunchWorkspaceBridge } from './launch-workspace.ts'
 import { DESKTOP_SETTINGS_FORMS_SERVICE } from './settings-bridge.ts'
@@ -131,6 +132,7 @@ export function apply(ctx: ClientContext): void {
   const sessionWindow = Boolean(window[SESSION_WINDOW_TARGET])
   if (sessionWindow) ctx.effect(() => installSessionWindowPresentation(), 'desktop: compact session presentation')
   applySessionWindows(ctx)
+  ctx.effect(() => installPastedTextFileBridge(), 'desktop: large pasted text attachment')
   ctx.effect(
     () => provideDesktopWindow(ctx, desktopWindowService(environment)),
     'dsh-plugin-desktop: native window geometry service',

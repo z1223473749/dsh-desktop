@@ -19,6 +19,7 @@
     "tests/client-sidebar-dom-anchor.spec.ts",
     "tests/client-sidebar-bulk-archive.spec.ts",
     "tests/theme-presenter.spec.ts",
-    "tests/client-session-window.spec.ts"
+    "tests/client-session-window.spec.ts",
+    "tests/client-pasted-text-file.spec.ts"
   ]
 }

@@ -242,7 +242,7 @@ export function installSidebarBulkArchive(options: SidebarBulkArchiveOptions, do
     menu.className = 'dshBulkArchive'
     menu.setAttribute('role', 'menu')
     const disabledActions: (keyof typeof bulkArchiveZh)[] = ['pin', 'rename', 'fork']
-    if (doc.defaultView?.__DSH_SESSION_WINDOW_UI__) disabledActions.unshift('openWindow')
+    if (doc.defaultView && Reflect.get(doc.defaultView, '__DSH_SESSION_WINDOW_UI__')) disabledActions.unshift('openWindow')
     for (const key of disabledActions) {
       const disabled = doc.createElement('button')
       disabled.type = 'button'

@@ -11,7 +11,7 @@ const page = window as Window & DesktopWorkspaceArchiveWindow
 let dispose = (): void => {}
 afterEach(() => {
   dispose(); dispose = () => {}
-  delete page.__DSH_SESSION_WINDOW_UI__
+  Reflect.deleteProperty(page, '__DSH_SESSION_WINDOW_UI__')
   delete page.__DSH_DESKTOP_ARCHIVE_WORKSPACE__
   document.body.replaceChildren(); vi.restoreAllMocks()
 })
@@ -126,8 +126,8 @@ describe('sidebar bulk archive', () => {
   it('keeps new-window above pin and disabled in a multi-selection menu', () => {
     const f = fixture()
     const open = vi.fn()
-    page.__DSH_SESSION_WINDOW_UI__ = { label: '新窗口打开', canOpen: () => true,
-      open, start: () => true, end: () => false }
+    Reflect.set(page, '__DSH_SESSION_WINDOW_UI__', { label: '新窗口打开', canOpen: () => true,
+      open, start: () => true, end: () => false })
     f.choose('a'); f.choose('c'); f.menu('a')
     const items = [...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')]
     expect(items.slice(0, 2).map(item => item.textContent)).toEqual(['新窗口打开', '置顶会话'])
@@ -285,8 +285,7 @@ describe('published workspace menu adapter', () => {
     expect(remove).not.toHaveBeenCalled()
     menu.onSelect('rename'); menu.onSelect('delete'); menu.onSelect('unknown')
     expect(rename).toHaveBeenCalledOnce(); expect(remove).toHaveBeenCalledOnce()
-    delete page.__DSH_SESSION_WINDOW_UI__
-  delete page.__DSH_DESKTOP_ARCHIVE_WORKSPACE__
+    delete page.__DSH_DESKTOP_ARCHIVE_WORKSPACE__
     expect(source).toContain('"data-row-key": `session:${node.id}`')
   })
 })
