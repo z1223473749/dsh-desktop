@@ -1,4 +1,4 @@
-/** Edition-local adapter over the browser configuration-form service. */
+/** Adapter over the browser configuration-form service. */
 
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'

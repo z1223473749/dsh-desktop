@@ -1,12 +1,13 @@
 /**
- * Edition-local adapter between the shared Desktop sources and the core job
+ * Adapter between the shared Desktop sources and the core job
  * registry's completion stream.
  *
- * Stable rides dsh 0.1.5-rc.2, whose registry exposes a dedicated
- * `onJobDone(listener)` seam handing out a terminal `JobSnapshot`. The Beta
- * channel's 0.1.7 core replaced both with one filtered event stream,
- * so the seam is edition-local while the narrowed outcome Desktop notifies on
- * stays identical.
+ * dsh 0.1.7 removed `JobRegistry#onJobDone` and the
+ * `JobSnapshot` projection in favour of one filtered event stream:
+ * `jobs.events.subscribe(filter, listener)` delivers `registered`, `progress`,
+ * `stopping`, `settled`, `removed`, and `output` events carrying a `JobView`.
+ * Desktop only ever wanted terminal states, so the adapter narrows the stream
+ * to the terminal-outcome shape 0.1.5's `onJobDone` listener handed out.
  */
 
 import type { Context } from '@deepseek-ai/cordis'
@@ -31,7 +32,8 @@ export function observeDesktopJobOutcomes(
   ctx: Context,
   listener: (outcome: DesktopJobOutcome) => void,
 ): () => void {
-  return ctx.jobs.onJobDone((snapshot) => {
-    listener(desktopJobOutcome(snapshot.status))
+  return ctx.jobs.events.subscribe({ owners: 'scope' }, (event) => {
+    if (event.type !== 'settled') return
+    listener(desktopJobOutcome(event.job.status))
   })
 }
