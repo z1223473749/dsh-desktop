@@ -1,0 +1,77 @@
+diff --git a/lib/client.js b/lib/client.js
+--- a/lib/client.js
++++ b/lib/client.js
+@@ -892,6 +892,7 @@
+ 				return result.value;
+ 			}
+ 			watchNavigation() {
++				if (globalThis.__DSH_SESSION_WINDOW_TARGET__) return () => { this.lifetime.abort(); };
+ 				let initial = "waiting";
+ 				const reconcile = () => {
+ 					if (this.lifetime.signal.aborted) return;
+@@ -1276,7 +1277,11 @@
+ 				id: "rename",
+ 				label: t("rename"),
+ 				icon: (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconEditOutlineRegular, {})
+-			}, {
++			}, ...(window.__DSH_DESKTOP_ARCHIVE_WORKSPACE__ ? [{
++				id: "desktop-archive",
++				label: window.__DSH_DESKTOP_ARCHIVE_WORKSPACE__.label(),
++				icon: (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconArchiveOutlineRegular, {})
++			}] : []), {
+ 				id: "delete",
+ 				label: t("delete.workspace"),
+ 				icon: (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconTrashOutlineRegular, {}),
+@@ -1322,7 +1327,7 @@
+ 							onSelect: (id) => {
+ 								setMenuOpen(false);
+ 								/* v8 ignore next -- Menu can emit only the rename and delete rows supplied above. */
+-								if (id !== "rename" && id !== "delete") return;
++								if (id === "desktop-archive") { window.__DSH_DESKTOP_ARCHIVE_WORKSPACE__?.archive(group.workspaceId); return; } if (id !== "rename" && id !== "delete") return;
+ 								if (id === "rename") actions.rename();
+ 								else actions.delete();
+ 							},
+@@ -1594,6 +1599,7 @@
+ 					role: "treeitem",
+ 					"aria-selected": selected,
+ 					"aria-description": row.archived ? t("toast.archivedNotOpenable") : void 0,
++					onContextMenu: (e) => { if (!row.blank && (window.__DSH_DESKTOP_ARCHIVE_WORKSPACE__ || globalThis.__DSH_SESSION_WINDOW_UI__)) { e.preventDefault(); e.stopPropagation(); setMenuOpen(true); } },
+ 					onClick: () => {
+ 						onOpen(node.id);
+ 					},
+@@ -1601,11 +1607,12 @@
+ 					onPointerLeave: marquee.leave,
+ 					draggable,
+ 					onDragStart: !draggable ? void 0 : (e) => {
++						if (globalThis.__DSH_SESSION_WINDOW_UI__ && !globalThis.__DSH_SESSION_WINDOW_UI__.start(node.id)) { e.preventDefault(); return; }
+ 						e.dataTransfer.effectAllowed = "move";
+ 						e.dataTransfer.setData("text/plain", node.id);
+ 						drag.start();
+ 					},
+-					onDragEnd: !draggable ? void 0 : drag.end,
++					onDragEnd: !draggable ? void 0 : (e) => { drag.end(globalThis.__DSH_SESSION_WINDOW_UI__?.end(node.id, e) === true); },
+ 					onDragOver: drag === void 0 ? void 0 : (e) => {
+ 						if (!drag.active) return;
+ 						e.preventDefault();
+@@ -2575,8 +2582,8 @@
+ 										half: normalizeHalf(half)
+ 									});
+ 								},
+-								end: () => {
+-									if (drag?.over !== null && drag?.over !== void 0) commitSessionDrag(drag, drag.over);
++								end: (cancel = false) => {
++									if (!cancel && drag?.over !== null && drag?.over !== void 0) commitSessionDrag(drag, drag.over);
+ 									else setDrag(null);
+ 									sessionDropCommitted.current = false;
+ 								}
+@@ -2709,8 +2716,8 @@
+ 										half: normalizeHalf(half)
+ 									});
+ 								},
+-								end: () => {
+-									if (drag?.over !== null && drag?.over !== void 0) commitDrag(drag, drag.over);
++								end: (cancel = false) => {
++									if (!cancel && drag?.over !== null && drag?.over !== void 0) commitDrag(drag, drag.over);
+ 									else setDrag(null);
+ 									dropCommitted.current = false;
+ 								}
